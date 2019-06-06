@@ -1,0 +1,107 @@
+{
+  "account_id": "RWFQBQ458EK44",
+  "legal_country_code": "GB",
+  "individual_owners": [
+    {
+      "id": "RWFQBQ458EK44",
+      "names": [
+        {
+          "given_name": "Mary2",
+          "surname": "Collins",
+          "id": "FCUW8TLVG85SQ",
+          "type": "LEGAL"
+        }
+      ],
+      "emails": [
+        {
+          "id": "ZPDR8KZWG6U68",
+          "primary": true,
+          "email": "p4pmp_58391b16-3ca6-446b-8a1c-027bfecb547c@concordia.com"
+        }
+      ],
+      "type": "PRIMARY"
+    }
+  ],
+  "business_entity": {
+    "incorporation_details": {},
+    "names": [
+      {
+        "business_name": "Demo Inc.2",
+        "id": "5ANRNFNVAYM3A",
+        "type": "LEGAL"
+      }
+    ],
+    "emails": [
+      {
+        "id": "Q5CMUMDKM4XUJ",
+        "primary": false,
+        "email": "p4pmp_58391b16-3ca6-446b-8a1c-027bfecb547c@concordia.com"
+      }
+    ]
+  },
+  "external_id": "EXT-1559171079102",
+  "organization": "eu/uk/marketplaces",
+  "user_id": "USER-1559171079102",
+  "primary_currency_code": "EUR",
+  "secondary_currency_codes": [
+    "GBP",
+    "USD"
+  ],
+  "soft_descriptor": "DEMO INC",
+  "capabilities": [
+    {
+      "name": "SEND_MONEY",
+      "limits": [
+        {
+          "type": "AMOUNT",
+          "unit": "USD",
+          "value": "2500",
+          "remaining_value": "2500"
+        },
+        {
+          "type": "AMOUNT",
+          "unit": "USD",
+          "value": "2500",
+          "remaining_value": "2500"
+        }
+      ],
+      "status": "ACTIVE"
+    },
+    {
+      "name": "RECEIVE_MONEY",
+      "limits": [
+        {
+          "type": "COUNT",
+          "unit": "NONE",
+          "value": "190",
+          "remaining_value": "190"
+        },
+        {
+          "type": "COUNT",
+          "unit": "USD",
+          "value": "1",
+          "remaining_value": "1"
+        },
+        {
+          "type": "AMOUNT",
+          "unit": "USD",
+          "value": "2500",
+          "remaining_value": "2500"
+        }
+      ],
+      "status": "ACTIVE"
+    }
+  ],
+  "links": [
+    {
+      "href": "https://localhost:8443/v3/customer/managed-accounts/RWFQBQ458EK44",
+      "rel": "edit",
+      "method": "PATCH"
+    },
+    {
+      "href": "https://localhost:8443/v3/customer/managed-accounts/RWFQBQ458EK44",
+      "rel": "replace",
+      "method": "PUT"
+    }
+  ]
+}

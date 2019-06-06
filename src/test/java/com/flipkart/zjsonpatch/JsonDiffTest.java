@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Random;
 
@@ -123,4 +124,21 @@ public class JsonDiffTest {
         JsonNode expected = objectMapper.readTree("{\"profiles\":{\"abc\":[],\"def\":[{\"hello\":\"world2\"},{\"hello\":\"world\"}]}}");
         Assert.assertEquals(target, expected);
     }
+
+    @Test
+    public void testPayPalDiff() throws Exception {
+        String path1 = "/testdata/paypal/paypal1.json";
+        String path2 = "/testdata/paypal/paypal2.json";
+
+        InputStream resourceAsStream1 = JsonDiffTest.class.getResourceAsStream(path1);
+        String testData1 = IOUtils.toString(resourceAsStream1, "UTF-8");
+        JsonNode first = objectMapper.readTree(testData1);
+        InputStream resourceAsStream2 = JsonDiffTest.class.getResourceAsStream(path2);
+        String testData2 = IOUtils.toString(resourceAsStream2, "UTF-8");
+        JsonNode second = objectMapper.readTree(testData2);
+
+        JsonNode actualPatch = JsonDiff.asJson(first, second, Arrays.asList("id", "name"));
+        System.out.println(actualPatch);
+    }
+
 }
