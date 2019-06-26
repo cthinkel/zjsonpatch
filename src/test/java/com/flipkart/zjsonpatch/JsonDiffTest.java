@@ -24,12 +24,12 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Random;
+
 
 /**
  * Unit test
@@ -53,7 +53,8 @@ public class JsonDiffTest {
             JsonNode second = jsonNode.get(i).get("second");
             JsonNode actualPatch = JsonDiff.asJson(first, second);
             JsonNode secondPrime = JsonPatch.apply(actualPatch, first);
-            Assert.assertEquals("JSON Patch not symmetrical [index=" + i + ", first=" + first + "]", second, secondPrime);
+            Assert.assertEquals("JSON Patch not symmetrical [index=" + i + ", first=" + first + "]", second,
+                    secondPrime);
         }
     }
 
@@ -102,7 +103,9 @@ public class JsonDiffTest {
         JsonNode source = objectMapper.readTree("{\"age\": 10}");
         JsonNode target = objectMapper.readTree("{\"height\": 10}");
 
-        EnumSet<DiffFlags> flags = DiffFlags.dontNormalizeOpIntoMoveAndCopy().clone(); //only have ADD, REMOVE, REPLACE, Don't normalize operations into MOVE & COPY
+        EnumSet<DiffFlags> flags = DiffFlags.dontNormalizeOpIntoMoveAndCopy().clone(); // only have ADD, REMOVE,
+                                                                                       // REPLACE, Don't normalize
+                                                                                       // operations into MOVE & COPY
 
         JsonNode diff = JsonDiff.asJson(source, target, flags);
 
@@ -118,10 +121,12 @@ public class JsonDiffTest {
     @Test
     public void testPath() throws Exception {
         JsonNode source = objectMapper.readTree("{\"profiles\":{\"abc\":[],\"def\":[{\"hello\":\"world\"}]}}");
-        JsonNode patch = objectMapper.readTree("[{\"op\":\"copy\",\"from\":\"/profiles/def/0\", \"path\":\"/profiles/def/0\"},{\"op\":\"replace\",\"path\":\"/profiles/def/0/hello\",\"value\":\"world2\"}]");
+        JsonNode patch = objectMapper.readTree(
+                "[{\"op\":\"copy\",\"from\":\"/profiles/def/0\", \"path\":\"/profiles/def/0\"},{\"op\":\"replace\",\"path\":\"/profiles/def/0/hello\",\"value\":\"world2\"}]");
 
         JsonNode target = JsonPatch.apply(patch, source);
-        JsonNode expected = objectMapper.readTree("{\"profiles\":{\"abc\":[],\"def\":[{\"hello\":\"world2\"},{\"hello\":\"world\"}]}}");
+        JsonNode expected = objectMapper
+                .readTree("{\"profiles\":{\"abc\":[],\"def\":[{\"hello\":\"world2\"},{\"hello\":\"world\"}]}}");
         Assert.assertEquals(target, expected);
     }
 
@@ -139,6 +144,26 @@ public class JsonDiffTest {
 
         JsonNode actualPatch = JsonDiff.asJson(first, second, Arrays.asList("id", "name"));
         System.out.println(actualPatch);
+    }
+
+    @Test
+    public void testRemoveArrayElement() throws Exception {
+        String path1 = "/testdata/paypal/arrays/target_array.json";
+        String path2 = "/testdata/paypal/arrays/source_array.json";
+
+        InputStream resourceAsStream1 = JsonDiffTest.class.getResourceAsStream(path1);
+        String testData1 = IOUtils.toString(resourceAsStream1, "UTF-8");
+        JsonNode first = objectMapper.readTree(testData1);
+        InputStream resourceAsStream2 = JsonDiffTest.class.getResourceAsStream(path2);
+        String testData2 = IOUtils.toString(resourceAsStream2, "UTF-8");
+        JsonNode second = objectMapper.readTree(testData2);
+
+        JsonNode actualPatch = JsonDiff.asJson(first, second, Arrays.asList("id", "name"));
+
+        Assert.assertEquals(1, actualPatch.size());
+        JsonNode patch = actualPatch.get(0);
+        Assert.assertEquals("remove", patch.get("op").asText());
+        Assert.assertEquals("/@id=='5ANRNFNVAYM3Q'", patch.get("path").asText());
     }
 
 }

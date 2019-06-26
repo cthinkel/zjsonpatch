@@ -20,15 +20,15 @@ package com.flipkart.zjsonpatch;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ContainerNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.collections4.ListUtils;
-
 import java.util.*;
 
+
 /**
- * User: gopi.vishwakarma
- * Date: 30/07/14
+ * User: gopi.vishwakarma Date: 30/07/14
  */
 
 public final class JsonDiff {
@@ -52,8 +52,8 @@ public final class JsonDiff {
         return asJson(source, target, DiffFlags.defaults(), new ArrayList<String>());
     }
 
-    public static JsonNode asJson(final JsonNode source, final JsonNode target, EnumSet<DiffFlags> flags, List<String>
-            identifiers) {
+    public static JsonNode asJson(final JsonNode source, final JsonNode target, EnumSet<DiffFlags> flags,
+            List<String> identifiers) {
         JsonDiff diff = new JsonDiff(flags);
 
         // generating diffs in the order of their occurrence
@@ -79,7 +79,8 @@ public final class JsonDiff {
 
         for (int i = 0; i < diffs.size(); i++) {
             Diff diff = diffs.get(i);
-            if (Operation.ADD != diff.getOperation()) continue;
+            if (Operation.ADD != diff.getOperation())
+                continue;
 
             JsonPointer matchingValuePath = getMatchingValuePath(unchangedValues, diff.getValue());
             if (matchingValuePath != null && isAllowed(matchingValuePath, diff.getPath())) {
@@ -136,7 +137,8 @@ public final class JsonDiff {
         return unchangedValues;
     }
 
-    private static void computeUnchangedValues(Map<JsonNode, JsonPointer> unchangedValues, JsonPointer path, JsonNode source, JsonNode target) {
+    private static void computeUnchangedValues(Map<JsonNode, JsonPointer> unchangedValues, JsonPointer path,
+            JsonNode source, JsonNode target) {
         if (source.equals(target)) {
             if (!unchangedValues.containsKey(target)) {
                 unchangedValues.put(target, path);
@@ -161,7 +163,8 @@ public final class JsonDiff {
         }
     }
 
-    private static void computeArray(Map<JsonNode, JsonPointer> unchangedValues, JsonPointer path, JsonNode source, JsonNode target) {
+    private static void computeArray(Map<JsonNode, JsonPointer> unchangedValues, JsonPointer path, JsonNode source,
+            JsonNode target) {
         final int size = Math.min(source.size(), target.size());
 
         for (int i = 0; i < size; i++) {
@@ -170,7 +173,8 @@ public final class JsonDiff {
         }
     }
 
-    private static void computeObject(Map<JsonNode, JsonPointer> unchangedValues, JsonPointer path, JsonNode source, JsonNode target) {
+    private static void computeObject(Map<JsonNode, JsonPointer> unchangedValues, JsonPointer path, JsonNode source,
+            JsonNode target) {
         final Iterator<String> firstFields = source.fieldNames();
         while (firstFields.hasNext()) {
             String name = firstFields.next();
@@ -182,8 +186,8 @@ public final class JsonDiff {
     }
 
     /**
-     * This method merge 2 diffs ( remove then add, or vice versa ) with same value into one Move operation,
-     * all the core logic resides here only
+     * This method merge 2 diffs ( remove then add, or vice versa ) with same value into one Move operation, all the
+     * core logic resides here only
      */
     private void introduceMoveOperation() {
         for (int i = 0; i < diffs.size(); i++) {
@@ -209,7 +213,9 @@ public final class JsonDiff {
 
                 } else if (Operation.ADD == diff1.getOperation() &&
                         Operation.REMOVE == diff2.getOperation()) {
-                    JsonPointer relativePath = computeRelativePath(diff2.getPath(), i, j - 1, diffs); // diff1's add should also be considered
+                    JsonPointer relativePath = computeRelativePath(diff2.getPath(), i, j - 1, diffs); // diff1's add
+                                                                                                      // should also be
+                                                                                                      // considered
                     moveDiff = new Diff(Operation.MOVE, relativePath, diff1.getPath());
                 }
                 if (moveDiff != null) {
@@ -221,8 +227,8 @@ public final class JsonDiff {
         }
     }
 
-    //Note : only to be used for arrays
-    //Finds the longest common Ancestor ending at Array
+    // Note : only to be used for arrays
+    // Finds the longest common Ancestor ending at Array
     private static JsonPointer computeRelativePath(JsonPointer path, int startIdx, int endIdx, List<Diff> diffs) {
         List<Integer> counters = new ArrayList<Integer>(path.size());
         for (int i = 0; i < path.size(); i++) {
@@ -231,7 +237,7 @@ public final class JsonDiff {
 
         for (int i = startIdx; i <= endIdx; i++) {
             Diff diff = diffs.get(i);
-            //Adjust relative path according to #ADD and #Remove
+            // Adjust relative path according to #ADD and #Remove
             if (Operation.ADD == diff.getOperation() || Operation.REMOVE == diff.getOperation()) {
                 updatePath(path, diff, counters);
             }
@@ -252,7 +258,7 @@ public final class JsonDiff {
     }
 
     private static void updatePath(JsonPointer path, Diff pseudo, List<Integer> counters) {
-        //find longest common prefix of both the paths
+        // find longest common prefix of both the paths
 
         if (pseudo.getPath().size() <= path.size()) {
             int idx = -1;
@@ -298,8 +304,9 @@ public final class JsonDiff {
         switch (diff.getOperation()) {
             case MOVE:
             case COPY:
-                jsonNode.put(Constants.FROM, diff.getPath().toString());    // required {from} only in case of Move Operation
-                jsonNode.put(Constants.PATH, diff.getToPath().toString());  // destination Path
+                jsonNode.put(Constants.FROM, diff.getPath().toString()); // required {from} only in case of Move
+                                                                         // Operation
+                jsonNode.put(Constants.PATH, diff.getToPath().toString()); // destination Path
                 break;
 
             case REMOVE:
@@ -332,13 +339,13 @@ public final class JsonDiff {
             final NodeType targetType = NodeType.getNodeType(target);
 
             if (sourceType == NodeType.ARRAY && targetType == NodeType.ARRAY) {
-                //both are arrays
+                // both are arrays
                 compareArray(path, source, target, identifiers);
             } else if (sourceType == NodeType.OBJECT && targetType == NodeType.OBJECT) {
-                //both are json
+                // both are json
                 compareObjects(path, source, target, identifiers);
             } else {
-                //can be replaced
+                // can be replaced
                 if (flags.contains(DiffFlags.EMIT_TEST_OPERATIONS))
                     diffs.add(new Diff(Operation.TEST, path, source));
                 diffs.add(Diff.generateDiff(Operation.REPLACE, path, source, target));
@@ -360,30 +367,32 @@ public final class JsonDiff {
             JsonNode lcsNode = lcs.get(lcsIdx);
             JsonNode srcNode = source.get(srcIdx);
             JsonNode targetNode = target.get(targetIdx);
-
-
-            if (lcsNode.equals(srcNode) && lcsNode.equals(targetNode)) { // Both are same as lcs node, nothing to do here
+            if (lcsNode.equals(srcNode) && lcsNode.equals(targetNode)) { // Both are same as lcs node, nothing to do
+                                                                         // here
                 srcIdx++;
                 targetIdx++;
                 lcsIdx++;
                 pos++;
             } else {
                 if (lcsNode.equals(srcNode)) { // src node is same as lcs, but not targetNode
-                    //addition
+                    System.out.println("Target Node is Same as LCS but not Source");
+                    // addition
                     JsonPointer currPath = getCurrPath(path, identifiers, pos, srcNode);
                     diffs.add(Diff.generateDiff(Operation.ADD, currPath, targetNode));
                     pos++;
                     targetIdx++;
-                } else if (lcsNode.equals(targetNode)) { //targetNode node is same as lcs, but not src
-                    //removal,
+                } else if (lcsNode.equals(targetNode)) { // targetNode node is same as lcs, but not src
+                    System.out.println("Target Node is Same as LCS but not Source");
+                    // removal,
                     JsonPointer currPath = getCurrPath(path, identifiers, pos, srcNode);
                     if (flags.contains(DiffFlags.EMIT_TEST_OPERATIONS))
                         diffs.add(new Diff(Operation.TEST, currPath, srcNode));
                     diffs.add(Diff.generateDiff(Operation.REMOVE, currPath, srcNode));
                     srcIdx++;
                 } else {
+                    System.out.println("Target Node is Same as LCS but not Source");
                     JsonPointer currPath = getCurrPath(path, identifiers, pos, srcNode);
-                    //both are unequal to lcs node
+                    // both are unequal to lcs node
                     generateDiffs(currPath, srcNode, targetNode, identifiers);
                     srcIdx++;
                     targetIdx++;
@@ -405,17 +414,28 @@ public final class JsonDiff {
         removeRemaining(path, pos, srcIdx, srcSize, source, identifiers);
     }
 
-    private JsonPointer getCurrPath(final JsonPointer path, final List<String> identifiers, final int pos,
-            final JsonNode srcNode) {
+    private JsonPointer getCurrPath(
+            final JsonPointer path,
+            final List<String> identifiers,
+            final int pos,
+            JsonNode srcNode) {
         final JsonPointer currPath;
         String pathId = null;
         if (identifiers != null && !identifiers.isEmpty()) {
-            for (String id : identifiers) {
-                if (srcNode.has(id)) {
-                    pathId = id;
+            for (final String id : identifiers) {
+                if (srcNode instanceof ArrayNode) {
+                    srcNode = srcNode.get(pos);
+                    if (srcNode.has(id)) {
+                        pathId = id;
+                    }
+                } else {
+                    if (srcNode.has(id)) {
+                        pathId = id;
+                    }
                 }
             }
         }
+
         if (pathId != null) {
             currPath = path.append("@" + pathId + "=='" + srcNode.get(pathId).asText() + "'");
         } else {
@@ -452,7 +472,7 @@ public final class JsonDiff {
         while (keysFromSrc.hasNext()) {
             String key = keysFromSrc.next();
             if (!target.has(key)) {
-                //remove case
+                // remove case
                 JsonPointer currPath = path.append(key);
                 if (flags.contains(DiffFlags.EMIT_TEST_OPERATIONS))
                     diffs.add(new Diff(Operation.TEST, currPath, source.get(key)));
@@ -466,7 +486,7 @@ public final class JsonDiff {
         while (keysFromTarget.hasNext()) {
             String key = keysFromTarget.next();
             if (!source.has(key)) {
-                //add case
+                // add case
                 JsonPointer currPath = path.append(key);
                 diffs.add(Diff.generateDiff(Operation.ADD, currPath, target.get(key)));
             }
@@ -474,6 +494,7 @@ public final class JsonDiff {
     }
 
     private static List<JsonNode> getLCS(final JsonNode first, final JsonNode second) {
-        return ListUtils.longestCommonSubsequence(InternalUtils.toList((ArrayNode) first), InternalUtils.toList((ArrayNode) second));
+        return ListUtils.longestCommonSubsequence(InternalUtils.toList((ArrayNode) first),
+                InternalUtils.toList((ArrayNode) second));
     }
 }
