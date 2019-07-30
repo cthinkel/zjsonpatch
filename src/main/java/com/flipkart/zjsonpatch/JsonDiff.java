@@ -433,6 +433,9 @@ public final class JsonDiff {
                         pathId = id;
                     }
                 }
+                if(pathId != null){
+                    break;
+                }
             }
         }
 
